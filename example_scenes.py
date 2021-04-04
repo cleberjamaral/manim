@@ -115,6 +115,53 @@ class AnimatingMethods(Scene):
         )
         self.wait()
 
+class AnimatingMethodsBit(Scene):
+    def construct(self):
+        grid = Tex(r"01").get_grid(10, 10, height=4)
+        self.add(grid)
+
+        # You can animate the application of mobject methods with the
+        # ".animate" syntax:
+        self.play(grid.animate.shift(LEFT))
+
+        # Alternatively, you can use the older syntax by passing the
+        # method and then the arguments to the scene's "play" function:
+        self.play(grid.shift, LEFT)
+
+        # Both of those will interpolate between the mobject's initial
+        # state and whatever happens when you apply that method.
+        # For this example, calling grid.shift(LEFT) would shift the
+        # grid one unit to the left, but both of the previous calls to
+        # "self.play" animate that motion.
+
+        # The same applies for any method, including those setting colors.
+        self.play(grid.animate.set_color(YELLOW))
+        self.wait()
+        self.play(grid.animate.set_submobject_colors_by_gradient(BLUE, GREEN))
+        self.wait()
+        self.play(grid.animate.set_height(TAU - MED_SMALL_BUFF))
+        self.wait()
+
+        # The method Mobject.apply_complex_function lets you apply arbitrary
+        # complex functions, treating the points defining the mobject as
+        # complex numbers.
+        self.play(grid.animate.apply_complex_function(np.exp), run_time=5)
+        self.wait()
+
+        # Even more generally, you could apply Mobject.apply_function,
+        # which takes in functions form R^3 to R^3
+        self.play(
+            grid.animate.apply_function(
+                lambda p: [
+                    p[0] + 0.5 * math.sin(p[1]),
+                    p[1] + 0.5 * math.sin(p[0]),
+                    p[2]
+                ]
+            ),
+            run_time=5,
+        )
+        self.wait()
+
 
 class TextExample(Scene):
     def construct(self):
@@ -337,12 +384,12 @@ class CoordinateSystemExample(Scene):
     def construct(self):
         axes = Axes(
             # x-axis ranges from -1 to 10, with a default step size of 1
-            x_range=(-1, 10),
+            x_range=(0, 5),
             # y-axis ranges from -2 to 10 with a step size of 0.5
-            y_range=(-2, 2, 0.5),
+            y_range=(0, 1, 1),
             # The axes will be stretched so as to match the specified
             # height and width
-            height=6,
+            height=1,
             width=10,
             # Axes is made of two NumberLine mobjects.  You can specify
             # their configuration with axis_config
@@ -372,10 +419,11 @@ class CoordinateSystemExample(Scene):
         dot = Dot(color=RED)
         dot.move_to(axes.c2p(0, 0))
         self.play(FadeIn(dot, scale=0.5))
-        self.play(dot.animate.move_to(axes.c2p(3, 2)))
-        self.wait()
-        self.play(dot.animate.move_to(axes.c2p(5, 0.5)))
-        self.wait()
+        self.play(dot.animate.move_to(axes.c2p(0, 1)))
+        self.play(dot.animate.move_to(axes.c2p(1, 1)))
+        self.play(dot.animate.move_to(axes.c2p(1, 0)))
+        self.play(dot.animate.move_to(axes.c2p(2, 0)))
+        self.play(dot.animate.move_to(axes.c2p(2, 1)))
 
         # Similarly, you can call axes.point_to_coords, or axes.p2c
         # print(axes.p2c(dot.get_center()))
@@ -391,9 +439,9 @@ class CoordinateSystemExample(Scene):
             ShowCreation(h_line),
             ShowCreation(v_line),
         )
-        self.play(dot.animate.move_to(axes.c2p(3, -2)))
-        self.wait()
-        self.play(dot.animate.move_to(axes.c2p(1, 1)))
+        self.play(dot.animate.move_to(axes.c2p(3, 1)))
+        self.play(dot.animate.move_to(axes.c2p(3, 0)))
+        self.play(dot.animate.move_to(axes.c2p(4, 0)))
         self.wait()
 
         # If we tie the dot to a particular set of coordinates, notice
@@ -410,6 +458,46 @@ class CoordinateSystemExample(Scene):
 
         # Other coordinate systems you can play around with include
         # ThreeDAxes, NumberPlane, and ComplexPlane.
+
+class CoordinateSystemExample2(Scene):
+    def construct(self):
+        axes = Axes((0, 8), (0, 1.5))
+        axes.add_coordinate_labels()
+
+        self.play(Write(axes, lag_ratio=0.01, run_time=1))
+
+        sign_graph = axes.get_graph(
+            lambda x: np.sign(math.sin(x * math.pi)),
+            color=BLUE,
+        )
+
+        # Axes.get_graph will return the graph of a function
+        sin_graph = axes.get_graph(
+            lambda x: math.sin(x * math.pi),
+            color=BLUE,
+        )
+
+        # Axes.get_graph_label takes in either a string or a mobject.
+        # If it's a string, it treats it as a LaTeX expression.  By default
+        # it places the label next to the graph near the right side, and
+        # has it match the color of the graph
+        sign_label = axes.get_graph_label(sign_graph, "sign(x)")
+
+        self.play(
+            ShowCreation(sign_graph),
+            FadeIn(sign_label, RIGHT),
+        )
+        self.wait(2)
+
+        sin_label = axes.get_graph_label(sin_graph, "\\sin(x)")
+
+        self.play(
+            ShowCreation(sin_graph),
+            FadeIn(sin_label, RIGHT),
+        )
+        self.wait(2)
+
+
 
 
 class GraphExample(Scene):
