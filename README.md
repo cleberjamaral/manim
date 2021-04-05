@@ -1,3 +1,7 @@
+Besides this document, I am also using these following ones:
+[install instructions](https://manim.readthedocs.io/en/latest/installation/linux.html)
+[tutorial](https://talkingphysics.wordpress.com/2018/06/11/creating-your-first-scene-manim-series-part-2/)
+
 <p align="center">
     <a href="https://github.com/3b1b/manim">
         <img src="https://raw.githubusercontent.com/3b1b/manim/master/logo/cropped.png">
