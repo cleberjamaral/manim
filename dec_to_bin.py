@@ -12,16 +12,12 @@ class SemiBox(VGroup):
     CONFIG = {
         "stroke_color": YELLOW
     }
-
     def __init__(self, mobject, **kwargs):
         VGroup.__init__(self, **kwargs)
-
         hline = Line(start=[-0.2,0,0], end=[mobject.get_width(),0,0]).next_to(mobject, DOWN, buff=SMALL_BUFF)
         hline.set_stroke(self.stroke_color)
-        #hline.set_width(hline.get_width() * 3)
         vline = Line(start=[0,-0.2,0], end=[0,mobject.get_height(),0]).next_to(mobject, LEFT, buff=SMALL_BUFF)
         vline.set_stroke(self.stroke_color)
-        #vline.set_height(vline.get_height() * 2)
         self.add(hline, vline)
 
 class DecimalSystem(Scene):
@@ -101,6 +97,19 @@ class DecimalSystem(Scene):
 
         self.wait(2)
 
+        rects_arrows = []
+        for re in reversed(rects):
+            if len(rects_arrows) < (len(rects) - 1):
+                arrow = CurvedArrow(
+                    re.get_left()+UP/2,
+                    rects[rects.index(re)-1].get_right()+UP/2,
+                    radius=1,
+                    color=YELLOW
+                )
+                rects_arrows.append(arrow)
+                self.play(Create(arrow))
+        self.wait(4)
+
         arrow = DoubleArrow(ORIGIN, 5*RIGHT).move_to(ORIGIN)
         self.play(
             Create(arrow),
@@ -115,6 +124,7 @@ class DecimalSystem(Scene):
 
         self.play(
             *list(map(FadeOut, rects)),
+            *list(map(FadeOut, rects_arrows)),
             dec2.animate.shift(UP).scale(0.667),
             FadeOut(arrow),
             FadeOut(tleft),
@@ -138,7 +148,7 @@ class DecimalSystem(Scene):
             r"1*", r"1", "~=~", "0b", f"${target_number:b}$"
         )
         self.play(
-            bin0.animate.shift(UP),
+            bin0.animate.shift(UP)
         )
         self.wait(6)
         self.play(
@@ -164,14 +174,32 @@ class DecimalSystem(Scene):
         for nn in reversed(range(0,len(bin1)//3)):
             bin1[1+(nn*3)].set_color(colors[-nn])
             bin2[1+(nn*3)].set_color(colors[-nn])
-        self.wait(3)
+        self.wait(6)
+
+        for nn in range(0,len(dec2)//3):
+            rects[nn] = SurroundingRectangle(dec2[1+(nn*3)], color = YELLOW)
+        self.play(*list(map(FadeIn, rects)))
+        self.wait(2)
 
         recbs = []
         for nn in range(0,len(bin2)//3):
-            recb = SurroundingRectangle(bin2[1+(nn*3)], color = YELLOW)
+            recb = SurroundingRectangle(bin2[1+(nn*3)], color = GREEN)
             recbs.append(recb)
         self.play(*list(map(Create, recbs)))
-        self.wait(3)
+        self.wait(6)
+
+        recbs_arrows = []
+        for re in reversed(recbs):
+            if len(recbs_arrows) < (len(recbs) - 1):
+                arrow = CurvedArrow(
+                    re.get_left()+UP/2,
+                    recbs[recbs.index(re)-1].get_right()+UP/2,
+                    radius=1,
+                    color=GREEN
+                )
+                recbs_arrows.append(arrow)
+                self.play(Create(arrow))
+        self.wait(4)
 
         bin = bin0[2].copy()
         bin.generate_target()
@@ -191,15 +219,15 @@ class DecimalSystem(Scene):
         )
         self.wait(2)
 
-        udb1 = Underline(bin_decomposed[0], color = YELLOW)
-        udb2 = Underline(bin_decomposed[2], color = YELLOW)
+        udb1 = Underline(bin_decomposed[0], color = ORANGE)
+        udb2 = Underline(bin_decomposed[2], color = ORANGE)
         self.play(
             Create(udb1),
             Create(udb2),
         )
         text_nibbles = Tex("Nibbles")
-        text_nibbles.set_color(YELLOW)
-        text_nibbles.next_to(bin_group, DOWN * 2)
+        text_nibbles.set_color(ORANGE)
+        text_nibbles.next_to(bin_group, DOWN * 2 + RIGHT)
         self.play(
             Create(text_nibbles)
         )
