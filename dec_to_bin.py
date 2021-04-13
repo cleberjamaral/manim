@@ -20,6 +20,46 @@ class SemiBox(VGroup):
         vline.set_stroke(self.stroke_color)
         self.add(hline, vline)
 
+class NumericalSystems(Scene):
+    def construct(self):
+        target_amount = 1000000.00
+        currency = Text("R$")
+        amount = DecimalNumber(0.01)
+        amount.next_to(currency,RIGHT)
+        money = VGroup(currency, amount)
+        money.move_to(ORIGIN)
+        self.play(
+            ShowCreation(money),
+            ChangeDecimalToValue(amount, target_amount),
+            run_time=3
+        )
+        self.wait()
+        self.play(FadeOut(money))
+
+        speedometer = Speedometer()
+        speedometer.set_height(5)
+        speedometer.move_needle_to_velocity(0)
+        self.play(DrawBorderThenFill(
+            speedometer,
+            lag_ratio = 0.5,
+            rate_func=linear,
+            run_time=2
+        ))
+        self.play(FadeOut(speedometer))
+
+        clock = Clock()
+        clock.set_height(5)
+        self.play(DrawBorderThenFill(
+            clock,
+            lag_ratio = 0.5,
+            rate_func=linear,
+        ))
+        self.play(
+            ClockPassesTime(clock),
+            run_time=2
+        )
+        self.play(FadeOut(clock))
+
 class DecimalSystem(Scene):
     def construct(self):
         target_number = 147
@@ -150,7 +190,11 @@ class DecimalSystem(Scene):
         self.play(
             bin0.animate.shift(UP)
         )
-        self.wait(6)
+        self.wait(1)
+        for nn in reversed(range(0,len(bin1)//3)):
+            bin1[1+(nn*3)].set_color(colors[-nn])
+        self.wait(5)
+
         self.play(
             dec2.animate.shift(UP),
             bin0.animate.shift(UP),
@@ -169,12 +213,11 @@ class DecimalSystem(Scene):
             r"1*", r"$2^0$", "~=~", "0b", f"${target_number:b}$"
         )
         self.play(Write(bin2))
-        self.wait(4)
+        self.wait(1)
 
         for nn in reversed(range(0,len(bin1)//3)):
-            bin1[1+(nn*3)].set_color(colors[-nn])
             bin2[1+(nn*3)].set_color(colors[-nn])
-        self.wait(6)
+        self.wait(5)
 
         for nn in range(0,len(dec2)//3):
             rects[nn] = SurroundingRectangle(dec2[1+(nn*3)], color = YELLOW)
@@ -186,7 +229,7 @@ class DecimalSystem(Scene):
             recb = SurroundingRectangle(bin2[1+(nn*3)], color = GREEN)
             recbs.append(recb)
         self.play(*list(map(Create, recbs)))
-        self.wait(6)
+        self.wait(2)
 
         recbs_arrows = []
         for re in reversed(recbs):
@@ -198,8 +241,14 @@ class DecimalSystem(Scene):
                     color=GREEN
                 )
                 recbs_arrows.append(arrow)
-                self.play(Create(arrow))
-        self.wait(4)
+        self.play(*list(map(Create, recbs_arrows)))
+        self.wait(8)
+
+        self.play(
+            *list(map(FadeOut, recbs_arrows)),
+            *list(map(FadeOut, rects)),
+            *list(map(FadeOut, recbs)),
+        )
 
         bin = bin0[2].copy()
         bin.generate_target()
@@ -219,6 +268,33 @@ class DecimalSystem(Scene):
         )
         self.wait(2)
 
+        bits_arrows = []
+        for i in range(0,4):
+            arrow = Arrow(
+                bin_decomposed[0].get_left()+UP + RIGHT*0.05 + RIGHT*(i*0.25),
+                bin_decomposed[0].get_left()    + RIGHT*0.05 + RIGHT*(i*0.25),
+                color=PURPLE
+            )
+            bits_arrows.append(arrow)
+        for i in range(0,4):
+            arrow = Arrow(
+                bin_decomposed[2].get_left()+UP + RIGHT*0.05 + RIGHT*(i*0.25),
+                bin_decomposed[2].get_left()    + RIGHT*0.05 + RIGHT*(i*0.25),
+                color=PURPLE
+            )
+            bits_arrows.append(arrow)
+        self.play(*list(map(Create, bits_arrows)))
+        self.wait(4)
+
+        text_bits = Tex("Bits")
+        text_bits.set_color(PURPLE)
+        text_bits.next_to(bin_group, UP * 2 + RIGHT)
+        self.play(
+            Create(text_bits)
+        )
+        self.wait(2)
+
+
         udb1 = Underline(bin_decomposed[0], color = ORANGE)
         udb2 = Underline(bin_decomposed[2], color = ORANGE)
         self.play(
@@ -227,7 +303,7 @@ class DecimalSystem(Scene):
         )
         text_nibbles = Tex("Nibbles")
         text_nibbles.set_color(ORANGE)
-        text_nibbles.next_to(bin_group, DOWN * 2 + RIGHT)
+        text_nibbles.next_to(bin_group, RIGHT * 2)
         self.play(
             Create(text_nibbles)
         )
@@ -239,10 +315,49 @@ class DecimalSystem(Scene):
         )
         text_byte = Tex("Byte")
         text_byte.set_color(BLUE)
-        text_byte.next_to(bin_group, RIGHT * 2)
+        text_byte.next_to(bin_group, DOWN * 2 + RIGHT)
         self.play(
             Create(text_byte)
         )
+
+class Test(Scene):
+    def construct(self):
+
+        bin_notation = Tex(r"0b")
+        bin_decomposed = Tex(r"1001", r"~~", r"0011")
+        bin_decomposed.next_to(bin_notation, RIGHT)
+        bin_group = VGroup(bin_notation, bin_decomposed)
+        bin_group.move_to(ORIGIN)
+        self.play(
+            Create(bin_group)
+        )
+
+        bits_arrows = []
+        for i in range(0,4):
+            arrow = Arrow(
+                bin_decomposed[0].get_left()+UP + RIGHT*0.05 + RIGHT*(i*0.25),
+                bin_decomposed[0].get_left()    + RIGHT*0.05 + RIGHT*(i*0.25),
+                color=PURPLE
+            )
+            bits_arrows.append(arrow)
+            self.play(Create(arrow))
+        for i in range(0,4):
+            arrow = Arrow(
+                bin_decomposed[2].get_left()+UP + RIGHT*0.05 + RIGHT*(i*0.25),
+                bin_decomposed[2].get_left()    + RIGHT*0.05 + RIGHT*(i*0.25),
+                color=PURPLE
+            )
+            bits_arrows.append(arrow)
+        self.play(*list(map(Create, bits_arrows)))
+        self.wait(1)
+
+        text_bits = Tex("Bits")
+        text_bits.set_color(PURPLE)
+        text_bits.next_to(bin_group, UP * 2 + RIGHT)
+        self.play(
+            Create(text_bits)
+        )
+        self.wait(2)
 
 
 class DecToBin(Scene):
