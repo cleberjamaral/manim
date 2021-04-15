@@ -1,64 +1,107 @@
 from manim import *
 import numpy as np
 
-# To watch one of these scenes, run the following:
-# python -m manim example_scenes.py SquareToCircle
-# Use -s to skip to the end and just save the final frame
-# Use -w to write the animation to a file
-# Use -o to write it to a file and open it once done
-# Use -n <number> to skip ahead to the n'th animation of a scene.
-
 class SemiBox(VGroup):
     CONFIG = {
         "stroke_color": YELLOW
     }
     def __init__(self, mobject, **kwargs):
         VGroup.__init__(self, **kwargs)
+        vline = Line(start=[0,mobject.get_height(),0], end=[0,-0.2,0]).next_to(mobject, LEFT, buff=SMALL_BUFF)
+        vline.set_stroke(self.stroke_color)
         hline = Line(start=[-0.2,0,0], end=[mobject.get_width(),0,0]).next_to(mobject, DOWN, buff=SMALL_BUFF)
         hline.set_stroke(self.stroke_color)
-        vline = Line(start=[0,-0.2,0], end=[0,mobject.get_height(),0]).next_to(mobject, LEFT, buff=SMALL_BUFF)
-        vline.set_stroke(self.stroke_color)
-        self.add(hline, vline)
+        self.add(vline, hline)
+
 
 class NumericalSystems(Scene):
     def construct(self):
-        target_amount = 1000000.00
-        currency = Text("R$")
-        amount = DecimalNumber(0.01)
+        target_amount = 1000.00
+        currency = Tex(r"R\$")
+        amount = DecimalNumber(0.00)
         amount.next_to(currency,RIGHT)
         money = VGroup(currency, amount)
-        money.move_to(ORIGIN)
+        money.move_to(ORIGIN+LEFT*3)
+        money.scale(4)
         self.play(
-            ShowCreation(money),
+            Create(money),
+        )
+        self.play(
             ChangeDecimalToValue(amount, target_amount),
-            run_time=3
         )
         self.wait()
-        self.play(FadeOut(money))
-
-        speedometer = Speedometer()
-        speedometer.set_height(5)
-        speedometer.move_needle_to_velocity(0)
-        self.play(DrawBorderThenFill(
-            speedometer,
-            lag_ratio = 0.5,
-            rate_func=linear,
-            run_time=2
-        ))
-        self.play(FadeOut(speedometer))
-
-        clock = Clock()
-        clock.set_height(5)
-        self.play(DrawBorderThenFill(
-            clock,
-            lag_ratio = 0.5,
-            rate_func=linear,
-        ))
         self.play(
-            ClockPassesTime(clock),
-            run_time=2
+            money.animate.scale(0.4).move_to(LEFT*5+UP*3)
         )
-        self.play(FadeOut(clock))
+
+        #Image created by Edward Boatman. Changed color and fill. Available at https://commons.wikimedia.org/wiki/File:Edward_Boatman_scale.svg
+        scale = SVGMobject("assets/Edward_Boatman_scale.svg")
+        scale.scale(2)
+        self.play(Create(scale))
+        self.wait()
+        self.play(
+            scale.animate.scale(0.5).move_to(LEFT*5)
+        )
+        # https://commons.wikimedia.org/wiki/File:Speedometer_(CoreUI_Icons_v1.0.0).svg
+        speedometer = SVGMobject("assets/Speedometer_(CoreUI_Icons_v1.0.0).svg")
+        speedometer.scale(2)
+        self.play(Create(speedometer))
+        self.wait()
+        self.play(
+            speedometer.animate.scale(0.5).move_to(LEFT*5+DOWN*3)
+        )
+
+        decimal = Integer(0)
+        decimal.move_to(ORIGIN+RIGHT)
+        decimal.scale(4)
+        self.play(Create(decimal))
+        self.play(ChangeDecimalToValue(decimal, 9))
+        self.wait()
+        decimal.set_value(0)
+        self.wait()
+        self.play(ChangeDecimalToValue(decimal, 9))
+        self.wait(2)
+        decimal.set_value(0)
+        self.wait()
+        self.play(ChangeDecimalToValue(decimal, 9))
+        self.wait(2)
+
+        self.play(
+            FadeOut(money),
+            FadeOut(speedometer),
+            FadeOut(scale),
+            FadeOut(decimal)
+        )
+
+        # https://commons.wikimedia.org/wiki/File:AnalogClockAnimation2_still_frame.svg
+        clock = SVGMobject("assets/AnalogClockAnimation2_still_frame.svg")
+        clock.scale(3)
+        self.play(Create(clock))
+        self.wait()
+        self.play(
+            clock.animate.scale(0.5).move_to(LEFT*5)
+        )
+
+        duodecimal = Integer(0)
+        duodecimal.move_to(ORIGIN+RIGHT)
+        duodecimal.scale(4)
+        self.play(Create(duodecimal))
+        self.play(ChangeDecimalToValue(duodecimal, 11))
+        self.wait()
+        duodecimal.set_value(0)
+        self.play(ChangeDecimalToValue(duodecimal, 11))
+        self.wait()
+        duodecimal.set_value(0)
+        self.play(ChangeDecimalToValue(duodecimal, 59))
+        self.wait()
+        duodecimal.set_value(0)
+        self.play(ChangeDecimalToValue(duodecimal, 59))
+        self.wait(4)
+
+        self.play(
+            FadeOut(duodecimal),
+            FadeOut(clock)
+        )
 
 class DecimalSystem(Scene):
     def construct(self):
@@ -322,87 +365,59 @@ class DecimalSystem(Scene):
 
 class Test(Scene):
     def construct(self):
+        #Image created by Edward Boatman. Changed color and fill. Available at https://commons.wikimedia.org/wiki/File:Edward_Boatman_scale.svg
+        img_mobject = SVGMobject("assets/Edward_Boatman_scale.svg")
+        img_mobject.scale(3)
+        self.add(img_mobject)
+        self.play(Create(img_mobject))
 
-        bin_notation = Tex(r"0b")
-        bin_decomposed = Tex(r"1001", r"~~", r"0011")
-        bin_decomposed.next_to(bin_notation, RIGHT)
-        bin_group = VGroup(bin_notation, bin_decomposed)
-        bin_group.move_to(ORIGIN)
-        self.play(
-            Create(bin_group)
-        )
-
-        bits_arrows = []
-        for i in range(0,4):
-            arrow = Arrow(
-                bin_decomposed[0].get_left()+UP + RIGHT*0.05 + RIGHT*(i*0.25),
-                bin_decomposed[0].get_left()    + RIGHT*0.05 + RIGHT*(i*0.25),
-                color=PURPLE
-            )
-            bits_arrows.append(arrow)
-            self.play(Create(arrow))
-        for i in range(0,4):
-            arrow = Arrow(
-                bin_decomposed[2].get_left()+UP + RIGHT*0.05 + RIGHT*(i*0.25),
-                bin_decomposed[2].get_left()    + RIGHT*0.05 + RIGHT*(i*0.25),
-                color=PURPLE
-            )
-            bits_arrows.append(arrow)
-        self.play(*list(map(Create, bits_arrows)))
-        self.wait(1)
-
-        text_bits = Tex("Bits")
-        text_bits.set_color(PURPLE)
-        text_bits.next_to(bin_group, UP * 2 + RIGHT)
-        self.play(
-            Create(text_bits)
-        )
-        self.wait(2)
+        self.wait(5)
 
 
 class DecToBin(Scene):
-    def print_result(self, dividend, divisor, dd, dv, rlist):
+    def print_result(self, dividend, divisor, dd, dv, rlist, rt):
         quotient = dividend // divisor
         remainder = dividend % divisor
 
         re = Tex(str(remainder)).next_to(dd, DOWN, buff=MED_SMALL_BUFF)
         rlist.append(re)
         qu = Tex(str(quotient)).next_to(dv, DOWN, buff=MED_SMALL_BUFF)
-        self.play(Write(qu))
-        self.play(Write(re))
+        self.play(Write(qu), run_time=rt)
+        self.play(Write(re), run_time=rt)
 
         ndv = Tex(str(divisor)).next_to(qu, RIGHT, buff=MED_SMALL_BUFF)
         if quotient >= divisor:
             semi_box = SemiBox(ndv, color = YELLOW)
-            self.play(Create(semi_box))
-            self.play(Write(ndv))
+            self.play(Create(semi_box, run_time=rt))
+            self.play(Write(ndv), run_time=rt)
 
         return quotient, qu, ndv
 
     def construct(self):
-        dividend = 67
+        dividend = 9
         divisor = 2
+        rt = 0.2
 
         dd = Tex(str(dividend))
-        self.play(Write(dd))
-        self.play(dd.animate.to_corner(UP + LEFT))
+        self.play(Write(dd), run_time=rt)
+        self.play(dd.animate.to_corner(UP + LEFT), run_time=rt)
         dv = Tex(str(divisor)).next_to(dd, RIGHT, buff=MED_SMALL_BUFF)
         semi_box = SemiBox(dv, color = YELLOW)
-        self.play(Create(semi_box))
-        self.play(Write(dv))
+        self.play(Create(semi_box), run_time=rt)
+        self.play(Write(dv), run_time=rt)
 
         rlist = []
-        quotient, qu, ndv = self.print_result(dividend, divisor, dd, dv, rlist)
+        quotient, qu, ndv = self.print_result(dividend, divisor, dd, dv, rlist, rt)
         while quotient >= divisor:
-            quotient, qu, ndv = self.print_result(quotient, divisor, qu, ndv, rlist);
+            quotient, qu, ndv = self.print_result(quotient, divisor, qu, ndv, rlist, rt);
         bin = qu.copy()
 
         rect = SurroundingRectangle(qu, color = PINK)
-        self.play(Create(rect))
+        self.play(Create(rect), run_time=rt)
         clist = [bin]
         for r in reversed(rlist):
             rect = SurroundingRectangle(r, color = PINK)
-            self.play(Create(rect))
+            self.play(Create(rect), run_time=rt)
             rem = r.copy()
             clist.append(rem)
 
@@ -414,10 +429,10 @@ class DecToBin(Scene):
                 c.target.next_to(clist[clist.index(c)-1], RIGHT)
             c.set_height(2*c.get_height())
             self.play(
-                MoveToTarget(c)
+                MoveToTarget(c), run_time=rt
             )
             self.play(
-                c.animate.scale(1.5)
+                c.animate.scale(1.5), run_time=rt
             )
 
         amsb = Arrow(start=UP, end=DOWN, buff=SMALL_BUFF).next_to(clist[0], DOWN)
@@ -433,7 +448,7 @@ class DecToBin(Scene):
             Create(msb),
             Create(tmsb),
             tmsb.animate.shift(LEFT),
-            clist[0].animate.scale(1.5)
+            clist[0].animate.scale(1.5), run_time=rt
         )
 
         alsb = Arrow(start=UP, end=DOWN, buff=SMALL_BUFF).next_to(clist[-1], DOWN)
@@ -449,7 +464,7 @@ class DecToBin(Scene):
             Create(lsb),
             Create(tlsb),
             tlsb.animate.shift(RIGHT*1.5),
-            clist[-1].animate.scale(0.75)
+            clist[-1].animate.scale(0.75), run_time=rt
         )
 
         self.wait()
